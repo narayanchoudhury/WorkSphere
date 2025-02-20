@@ -16,7 +16,7 @@ namespace WorkSphere
             routes.MapRoute(
                 name: "Default",
                 url: "{controller}/{action}/{id}",
-                defaults: new { controller = "Auth", action = "login", id = UrlParameter.Optional }
+                defaults: new { controller = "Login", action = "login", id = UrlParameter.Optional }
             );
         }
     }
