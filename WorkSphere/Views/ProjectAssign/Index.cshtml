@@ -1,0 +1,232 @@
+﻿@{
+    ViewBag.Title = "Project Assignment";
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Project Assignment</title>
+
+    <!-- Bootstrap CSS -->
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Select2 CSS -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css" rel="stylesheet" />
+
+    <style>
+        body {
+            background-color: #f8f9fa;
+        }
+
+        .container {
+            margin-top: 40px;
+        }
+
+        .card {
+            border-radius: 10px;
+            box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .card-header {
+            background-color: #007bff;
+            color: white;
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        .btn {
+            border-radius: 5px;
+        }
+
+        .table th, .table td {
+            text-align: center;
+            vertical-align: middle;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h2 class="text-center text-primary mb-4">Project Assignment</h2>
+
+        <div class="card">
+            <div class="card-header">Assign Project to Users</div>
+            <div class="card-body">
+                <input type="hidden" id="assignmentId" />
+
+                <!-- Project Dropdown -->
+                <div class="form-group">
+                    <label><strong>Project</strong></label>
+                    <select id="projectDropdown" class="form-control select2">
+                        <option value="">Select Project</option>
+                        @foreach (var project in ViewBag.Projects)
+                        {
+                            <option value="@project.Id">@project.ProjectName</option>
+                        }
+                    </select>
+                </div>
+
+                <!-- Multi-Select User Dropdown -->
+                <div class="form-group">
+                    <label><strong>Assign Users</strong></label>
+                    <select id="userDropdown" class="form-control select2-multi" multiple="multiple">
+                        @foreach (var user in ViewBag.Users)
+                        {
+                            <option value="@user.Id">@user.FullName</option>
+                        }
+                    </select>
+                </div>
+
+                <!-- Date & Time Pickers -->
+                <div class="row">
+                    <div class="col-md-6">
+                        <label><strong>From Date & Time</strong></label>
+                        <input type="datetime-local" id="fromDateTime" class="form-control" />
+                    </div>
+                    <div class="col-md-6">
+                        <label><strong>To Date & Time</strong></label>
+                        <input type="datetime-local" id="toDateTime" class="form-control" />
+                    </div>
+                </div>
+
+                <!-- Save Button -->
+                <div class="text-center mt-4">
+                    <button class="btn btn-success px-4" onclick="saveAssignment()">Save Assignment</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Assignment Table -->
+        <div class="card mt-4">
+            <div class="card-header">Assigned Projects</div>
+            <div class="card-body">
+                <table class="table table-bordered table-striped">
+                    <thead class="thead-dark">
+                        <tr>
+                            <th>Project</th>
+                            <th>Assigned Users</th>
+                            <th>From</th>
+                            <th>To</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="assignmentTable"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- jQuery and Bootstrap -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+    <!-- Select2 JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js"></script>
+
+    <script>
+        $(function () {
+            // Initialize Select2 Dropdowns
+            $(".select2").select2();
+            $(".select2-multi").select2();
+            loadAssignments();
+        });
+        function parseMicrosoftDate(jsonDate) {
+            var date = new Date(parseInt(jsonDate.match(/\d+/)[0]));
+
+            var year = date.getFullYear();
+            var month = (date.getMonth() + 1).toString().padStart(2, '0');
+            var day = date.getDate().toString().padStart(2, '0');
+            var hours = date.getHours().toString().padStart(2, '0');
+            var minutes = date.getMinutes().toString().padStart(2, '0');
+            var seconds = date.getSeconds().toString().padStart(2, '0');
+            var milliseconds = date.getMilliseconds().toString().padStart(3, '0');
+
+            return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}.${milliseconds}`;
+        }
+
+        function loadAssignments() {
+            $.get("/ProjectAssign/GetAllAssignments", function (data) {
+                $("#assignmentTable").html("");
+                $.each(data, function (index, item) {
+                    let users = item.AssignedUserIds.split(',')
+                        .map(id => $("#userDropdown option[value='" + id + "']").text())
+                        .join(", ");
+
+                    let formattedFromDate = parseMicrosoftDate(item.FromDateTime);
+                    let formattedToDate = parseMicrosoftDate(item.ToDateTime);
+
+                    $("#assignmentTable").append(`
+                <tr>
+                    <td>${$("#projectDropdown option[value='" + item.ProjectId + "']").text()}</td>
+                    <td>${users}</td>
+                    <td>${formattedFromDate}</td>
+                    <td>${formattedToDate}</td>
+                    <td>
+                        <button class="btn btn-warning btn-sm" onclick="editAssignment(${item.Id})">Edit</button>
+                        <button class="btn btn-danger btn-sm" onclick="deleteAssignment(${item.Id})">Delete</button>
+                    </td>
+                </tr>
+            `);
+                });
+            });
+        }
+
+        function saveAssignment() {
+            var assignment = {
+                Id: $("#assignmentId").val() || 0,
+                ProjectId: $("#projectDropdown").val(),
+                AssignedUserIds: $("#userDropdown").val() ? $("#userDropdown").val().join(",") : "",
+                FromDateTime: $("#fromDateTime").val(),
+                ToDateTime: $("#toDateTime").val()
+            };
+
+            $.post("/ProjectAssign/AddOrUpdate", assignment, function () {
+                alert("Assignment saved successfully!");
+                $("#assignmentId").val("");
+                loadAssignments();
+            });
+        }
+
+        function editAssignment(id) {
+            $.get("/ProjectAssign/GetAssignmentById?id=" + id, function (data) {
+                $("#assignmentId").val(data.Id);
+                $("#projectDropdown").val(data.ProjectId).trigger("change");
+                $("#userDropdown").val(data.AssignedUserIds.split(",")).trigger("change");
+
+                // Convert datetime to proper format for input[type="datetime-local"]
+                $("#fromDateTime").val(formatDateTimeLocal(data.FromDateTime));
+                $("#toDateTime").val(formatDateTimeLocal(data.ToDateTime));
+            });
+        }
+
+        // Function to format the date properly for datetime-local input
+        function formatDateTimeLocal(dateString) {
+            if (!dateString) return "";
+
+            var date = new Date(parseInt(dateString.match(/\d+/)[0]));
+
+            var year = date.getFullYear();
+            var month = (date.getMonth() + 1).toString().padStart(2, '0');
+            var day = date.getDate().toString().padStart(2, '0');
+            var hours = date.getHours().toString().padStart(2, '0');
+            var minutes = date.getMinutes().toString().padStart(2, '0');
+
+            return `${year}-${month}-${day}T${hours}:${minutes}`;
+        }
+
+        function deleteAssignment(id) {
+            if (confirm("Are you sure you want to delete this assignment?")) {
+                $.post("/ProjectAssign/DeleteAssignment", { id: id }, function () {
+                    alert("Assignment deleted successfully!");
+                    loadAssignments();
+                });
+            }
+        }
+    </script>
+
+</body>
+</html>
