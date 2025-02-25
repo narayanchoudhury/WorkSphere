@@ -1,177 +1,294 @@
 ﻿@{
     ViewBag.Title = "Project Assignment";
-    Layout = null;
+    Layout = "~/Views/Shared/_Templayout.cshtml";
 }
+<style>
+    /* Reduce table font size */
+    #assignmentsTable {
+        font-size: 12px; /* Smaller text */
+    }
 
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Project Assignment</title>
-
-    <!-- Bootstrap CSS -->
-    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
-
-    <!-- Select2 CSS -->
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css" rel="stylesheet" />
-
-    <style>
-        body {
-            background-color: #f8f9fa;
-        }
-
-        .container {
-            margin-top: 40px;
-        }
-
-        .card {
-            border-radius: 10px;
-            box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
-        }
-
-        .card-header {
-            background-color: #007bff;
-            color: white;
-            font-size: 18px;
-            font-weight: bold;
-        }
-
-        .btn {
-            border-radius: 5px;
-        }
-
-        .table th, .table td {
+        /* Table header styling */
+        #assignmentsTable thead th {
+            font-size: 12px; /* Reduce header font size */
+            padding: 6px 8px; /* Compact padding */
+            background-color: #09bd3c; /* Dark header */
+            color: white; /* White text */
             text-align: center;
             vertical-align: middle;
         }
-    </style>
-</head>
-<body>
 
-    <div class="container">
-        <h2 class="text-center text-primary mb-4">Project Assignment</h2>
+        /* Table body styling */
+        #assignmentsTable tbody td {
+            font-size: 11px; /* Smaller table data font */
+            padding: 5px 7px; /* Reduce spacing inside cells */
+            text-align: center;
+            vertical-align: middle;
+        }
 
-        <div class="card">
-            <div class="card-header">Assign Project to Users</div>
-            <div class="card-body">
-                <input type="hidden" id="assignmentId" />
+        /* Reduce row height for better spacing */
+        #assignmentsTable tbody tr {
+            height: 30px;
+        }
 
-                <!-- Project Dropdown -->
-                <div class="form-group">
-                    <label><strong>Project</strong></label>
-                    <select id="projectDropdown" class="form-control select2">
-                        <option value="">Select Project</option>
-                        @foreach (var project in ViewBag.Projects)
-                        {
-                            <option value="@project.Id">@project.ProjectName</option>
-                        }
-                    </select>
-                </div>
+        /* Adjust table borders */
+        #assignmentsTable th, #assignmentsTable td {
+            border: 1px solid #dee2e6;
+        }
 
-                <!-- Multi-Select User Dropdown -->
-                <div class="form-group">
-                    <label><strong>Assign Users</strong></label>
-                    <select id="userDropdown" class="form-control select2-multi" multiple="multiple">
-                        @foreach (var user in ViewBag.Users)
-                        {
-                            <option value="@user.Id">@user.FullName</option>
-                        }
-                    </select>
-                </div>
+        /* Styling for action buttons */
+        #assignmentsTable button {
+            font-size: 11px;
+            padding: 4px 6px;
+            margin: 2px;
+        }
 
-                <!-- Date & Time Pickers -->
-                <div class="row">
-                    <div class="col-md-6">
-                        <label><strong>From Date & Time</strong></label>
-                        <input type="datetime-local" id="fromDateTime" class="form-control" />
+    .dataTables_wrapper .dataTables_paginate {
+        display: flex !important;
+        justify-content: center !important;
+    }
+
+        .dataTables_wrapper .dataTables_paginate .paginate_button {
+            padding: 5px 10px;
+            margin: 2px;
+            border-radius: 5px;
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            color: #007bff;
+            cursor: pointer;
+        }
+
+            .dataTables_wrapper .dataTables_paginate .paginate_button:hover {
+                background: #007bff;
+                color: white;
+            }
+
+            .dataTables_wrapper .dataTables_paginate .paginate_button.current {
+                background: #007bff !important;
+                color: white !important;
+                border-color: #007bff;
+            }
+            .dataTables_wrapper .dataTables_paginate .paginate_button.previous, .dataTables_wrapper .dataTables_paginate .paginate_button.next {
+                font-size: 11px !important;
+                margin: 0 10px !important
+            }
+</style>
+<div class="container mt-4">
+    <div class="row page-titles">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item active"><a href="javascript:void(0)">Assign Project</a></li>
+            <li class="breadcrumb-item"><a href="javascript:void(0)">Assign Project</a></li>
+        </ol>
+    </div>
+    <div class="card shadow-lg p-4">
+        <div class="card-header">Assign Project to Users</div>
+        <div class="card-body">
+            <input type="hidden" id="assignmentId" />
+            <div class="row">
+                <div class="col-md-6">
+                    <!-- Project Dropdown -->
+                    <div class="form-group">
+                        <label><strong>Project</strong></label>
+                        <select id="projectDropdown" class="form-control select2">
+                            <option value="">Select Project</option>
+                            @foreach (var project in ViewBag.Projects)
+                            {
+                                <option value="@project.Id">@project.ProjectName</option>
+                            }
+                        </select>
                     </div>
-                    <div class="col-md-6">
-                        <label><strong>To Date & Time</strong></label>
-                        <input type="datetime-local" id="toDateTime" class="form-control" />
-                    </div>
                 </div>
-
-                <!-- Save Button -->
-                <div class="text-center mt-4">
-                    <button class="btn btn-success px-4" onclick="saveAssignment()">Save Assignment</button>
+                <div class="col-md-6">
+                    <!-- Multi-Select Users Dropdown -->
+                    <div class="form-group">
+                        <label><strong>Assign Users</strong></label>
+                        <select id="userDropdown" class="form-control select2" multiple>
+                            @foreach (var user in ViewBag.Users)
+                            {
+                                <option value="@user.Id">@user.FullName</option>
+                            }
+                        </select>
+                    </div>
                 </div>
             </div>
-        </div>
 
-        <!-- Assignment Table -->
-        <div class="card mt-4">
-            <div class="card-header">Assigned Projects</div>
-            <div class="card-body">
-                <table class="table table-bordered table-striped">
-                    <thead class="thead-dark">
-                        <tr>
-                            <th>Project</th>
-                            <th>Assigned Users</th>
-                            <th>From</th>
-                            <th>To</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody id="assignmentTable"></tbody>
-                </table>
+            <!-- Date & Time Pickers -->
+            <div class="row">
+                <div class="col-md-6">
+                    <label><strong>From Date & Time</strong></label>
+                    <input type="datetime-local" id="fromDateTime" class="form-control" />
+                </div>
+                <div class="col-md-6">
+                    <label><strong>To Date & Time</strong></label>
+                    <input type="datetime-local" id="toDateTime" class="form-control" />
+                </div>
+            </div>
+
+            <div class="text-center mt-4">
+                <button class="btn btn-success px-4" onclick="saveAssignment()">Save Assignment</button>
             </div>
         </div>
     </div>
 
-    <!-- jQuery and Bootstrap -->
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <!-- Assigned Projects Table -->
+    <div class="card  shadow-lg  mt-4">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <span>Assigned Projects</span>
+            <div class="export-buttons"></div> <!-- Buttons will be placed here -->
+        </div>
+        <div class="card-body">
+            <table id="assignmentsTable" class="table table-striped table-bordered">
+                <thead class="thead-dark">
+                    <tr>
+                        <th>Project</th>
+                        <th>Assigned Users</th>
+                        <th>From</th>
+                        <th>To</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="assignmentTable"></tbody>
+            </table>
+        </div>
+    </div>
 
-    <!-- Select2 JS -->
+
+</div>
+@section Scripts {
+    <!-- Include Select2 JS -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js"></script>
 
+    <!-- SweetAlert2 -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <!-- DataTables & Export Libraries -->
+    <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/2.4.2/js/dataTables.buttons.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/pdfmake.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/vfs_fonts.js"></script>
+    <script src="https://cdn.datatables.net/buttons/2.4.2/js/buttons.html5.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/2.4.2/js/buttons.print.min.js"></script>
+
     <script>
-        $(function () {
-            // Initialize Select2 Dropdowns
-            $(".select2").select2();
-            $(".select2-multi").select2();
+        $(document).ready(function () {
+            // Initialize Select2
+            $(".select2").select2({
+                placeholder: "Select an option",
+                allowClear: true
+            });
+
+            console.log("✅ Select2 initialized successfully.");
             loadAssignments();
         });
-        function parseMicrosoftDate(jsonDate) {
-            var date = new Date(parseInt(jsonDate.match(/\d+/)[0]));
-
-            var year = date.getFullYear();
-            var month = (date.getMonth() + 1).toString().padStart(2, '0');
-            var day = date.getDate().toString().padStart(2, '0');
-            var hours = date.getHours().toString().padStart(2, '0');
-            var minutes = date.getMinutes().toString().padStart(2, '0');
-            var seconds = date.getSeconds().toString().padStart(2, '0');
-            var milliseconds = date.getMilliseconds().toString().padStart(3, '0');
-
-            return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}.${milliseconds}`;
-        }
 
         function loadAssignments() {
             $.get("/ProjectAssign/GetAllAssignments", function (data) {
                 $("#assignmentTable").html("");
+
                 $.each(data, function (index, item) {
                     let users = item.AssignedUserIds.split(',')
                         .map(id => $("#userDropdown option[value='" + id + "']").text())
                         .join(", ");
 
-                    let formattedFromDate = parseMicrosoftDate(item.FromDateTime);
-                    let formattedToDate = parseMicrosoftDate(item.ToDateTime);
+                    let fromDateTime = formatDateTime(item.FromDateTime);
+                    let toDateTime = formatDateTime(item.ToDateTime);
 
                     $("#assignmentTable").append(`
-                <tr>
-                    <td>${$("#projectDropdown option[value='" + item.ProjectId + "']").text()}</td>
-                    <td>${users}</td>
-                    <td>${formattedFromDate}</td>
-                    <td>${formattedToDate}</td>
-                    <td>
-                        <button class="btn btn-warning btn-sm" onclick="editAssignment(${item.Id})">Edit</button>
-                        <button class="btn btn-danger btn-sm" onclick="deleteAssignment(${item.Id})">Delete</button>
-                    </td>
-                </tr>
-            `);
+                            <tr>
+                                <td>${$("#projectDropdown option[value='" + item.ProjectId + "']").text()}</td>
+                                <td>${users}</td>
+                                <td>${fromDateTime}</td>
+                                <td>${toDateTime}</td>
+                                <td>
+                                    <button class="btn btn-warning btn-sm" onclick="editAssignment(${item.Id})">Edit</button>
+                                    <button class="btn btn-danger btn-sm" onclick="deleteAssignment(${item.Id})">Delete</button>
+                                </td>
+                            </tr>
+                        `);
                 });
+
+                // Initialize DataTable with Export Buttons
+                $("#assignmentsTable").DataTable({
+                    destroy: true, // Prevent duplication
+                    dom: "Bfrtip", // Keep buttons functional
+                    pageLength: 10, // Show 10 records per page
+                    paging: true,
+                    searching: true,
+                    ordering: true,
+                    pagingType: "full_numbers",
+                    buttons: [
+                        {
+                            extend: "excelHtml5",
+                            text: '<i class="fas fa-file-excel"></i> Excel',
+                            className: "btn btn-success btn-sm"
+                        },
+                        {
+                            extend: "csvHtml5",
+                            text: '<i class="fas fa-file-csv"></i> CSV',
+                            className: "btn btn-info btn-sm"
+                        },
+                        {
+                            extend: "pdfHtml5",
+                            text: '<i class="fas fa-file-pdf"></i> PDF',
+                            className: "btn btn-danger btn-sm",
+                            orientation: "landscape",
+                            pageSize: "A4"
+                        },
+                        {
+                            extend: "print",
+                            text: '<i class="fas fa-print"></i> Print',
+                            className: "btn btn-primary btn-sm"
+                        }
+                    ],
+                    initComplete: function () {
+                        let buttonContainer = $(".dt-buttons").addClass("d-flex gap-2");
+                        $(".export-buttons").html(buttonContainer); // Move buttons to the custom div
+                    }
+                });
+
+
+            });
+        }
+
+        function formatDateTime(jsonDate) {
+            if (!jsonDate) return "";
+
+            let timestamp = parseInt(jsonDate.match(/\d+/)[0]);
+            let date = new Date(timestamp);
+
+            let day = String(date.getDate()).padStart(2, '0');
+            let month = String(date.getMonth() + 1).padStart(2, '0');
+            let year = date.getFullYear();
+            let hours = String(date.getHours()).padStart(2, '0');
+            let minutes = String(date.getMinutes()).padStart(2, '0');
+
+            return `${day}-${month}-${year} ${hours}:${minutes}`;
+        }
+
+        function formatForInput(jsonDate) {
+            if (!jsonDate) return "";
+
+            let timestamp = parseInt(jsonDate.match(/\d+/)[0]);
+            let date = new Date(timestamp);
+
+            let year = date.getFullYear();
+            let month = String(date.getMonth() + 1).padStart(2, '0');
+            let day = String(date.getDate()).padStart(2, '0');
+            let hours = String(date.getHours()).padStart(2, '0');
+            let minutes = String(date.getMinutes()).padStart(2, '0');
+
+            return `${year}-${month}-${day}T${hours}:${minutes}`;
+        }
+
+        function editAssignment(id) {
+            $.get("/ProjectAssign/GetAssignmentById?id=" + id, function (data) {
+                $("#assignmentId").val(data.Id);
+                $("#projectDropdown").val(data.ProjectId).trigger("change");
+                $("#userDropdown").val(data.AssignedUserIds.split(",")).trigger("change");
+
+                $("#fromDateTime").val(formatForInput(data.FromDateTime));
+                $("#toDateTime").val(formatForInput(data.ToDateTime));
             });
         }
 
@@ -185,48 +302,47 @@
             };
 
             $.post("/ProjectAssign/AddOrUpdate", assignment, function () {
-                alert("Assignment saved successfully!");
+                Swal.fire({
+                    icon: "success",
+                    title: "Success!",
+                    text: "Assignment saved successfully!",
+                    toast: true,
+                    position: "top-end",
+                    showConfirmButton: false,
+                    timer: 3000
+                });
+
                 $("#assignmentId").val("");
                 loadAssignments();
             });
         }
 
-        function editAssignment(id) {
-            $.get("/ProjectAssign/GetAssignmentById?id=" + id, function (data) {
-                $("#assignmentId").val(data.Id);
-                $("#projectDropdown").val(data.ProjectId).trigger("change");
-                $("#userDropdown").val(data.AssignedUserIds.split(",")).trigger("change");
-
-                // Convert datetime to proper format for input[type="datetime-local"]
-                $("#fromDateTime").val(formatDateTimeLocal(data.FromDateTime));
-                $("#toDateTime").val(formatDateTimeLocal(data.ToDateTime));
+        function deleteAssignment(id) {
+            Swal.fire({
+                title: "Are you sure?",
+                text: "You won't be able to recover this assignment!",
+                icon: "warning",
+                showCancelButton: true,
+                confirmButtonColor: "#d33",
+                cancelButtonColor: "#3085d6",
+                confirmButtonText: "Yes, delete it!"
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    $.post("/ProjectAssign/DeleteAssignment", { id: id }, function () {
+                        Swal.fire({
+                            icon: "success",
+                            title: "Deleted!",
+                            text: "Assignment deleted successfully!",
+                            toast: true,
+                            position: "top-end",
+                            showConfirmButton: false,
+                            timer: 3000
+                        });
+                        loadAssignments();
+                    });
+                }
             });
         }
-
-        // Function to format the date properly for datetime-local input
-        function formatDateTimeLocal(dateString) {
-            if (!dateString) return "";
-
-            var date = new Date(parseInt(dateString.match(/\d+/)[0]));
-
-            var year = date.getFullYear();
-            var month = (date.getMonth() + 1).toString().padStart(2, '0');
-            var day = date.getDate().toString().padStart(2, '0');
-            var hours = date.getHours().toString().padStart(2, '0');
-            var minutes = date.getMinutes().toString().padStart(2, '0');
-
-            return `${year}-${month}-${day}T${hours}:${minutes}`;
-        }
-
-        function deleteAssignment(id) {
-            if (confirm("Are you sure you want to delete this assignment?")) {
-                $.post("/ProjectAssign/DeleteAssignment", { id: id }, function () {
-                    alert("Assignment deleted successfully!");
-                    loadAssignments();
-                });
-            }
-        }
     </script>
+}
 
-</body>
-</html>

@@ -1,6 +1,8 @@
 ﻿using System.Web.Mvc;
 using WorkSphere.Repositories;
 using System.Web.Security;
+using System.Reflection;
+using WorkSphere.Models;
 
 namespace WorkSphere.Controllers
 {
@@ -28,7 +30,7 @@ namespace WorkSphere.Controllers
                 FormsAuthentication.SetAuthCookie(username, false);
                 Session["Username"] = user.Username;
                 Session["UserRole"] = user.Role;
-                return RedirectToAction("Register", "Auth");
+                return RedirectToAction("Index", "ProjectAssign"); 
             }
 
             ViewBag.ErrorMessage = "Invalid username or password.";

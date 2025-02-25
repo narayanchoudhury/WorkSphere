@@ -1,99 +1,287 @@
 ﻿@{
+    Layout = "~/Views/Shared/_Templayout.cshtml";
     ViewBag.Title = "Project Management";
 }
+<style>
+    /* Reduce table font size */
+    #projectTable {
+        font-size: 12px; /* Smaller text */
+    }
 
-<h2>Project Management</h2>
+        /* Table header styling */
+        #projectTable thead th {
+            font-size: 12px; /* Reduce header font size */
+            padding: 6px 8px; /* Compact padding */
+            background-color: #09bd3c; /* Dark header */
+            color: white; /* White text */
+            text-align: center;
+            vertical-align: middle;
+        }
 
+        /* Table body styling */
+        #projectTable tbody td {
+            font-size: 11px; /* Smaller table data font */
+            padding: 5px 7px; /* Reduce spacing inside cells */
+            text-align: center;
+            vertical-align: middle;
+        }
+
+        /* Reduce row height for better spacing */
+        #projectTable tbody tr {
+            height: 30px;
+        }
+
+        /* Adjust table borders */
+        #projectTable th, #projectTable td {
+            border: 1px solid #dee2e6;
+        }
+
+        /* Styling for action buttons */
+        #projectTable button {
+            font-size: 11px;
+            padding: 4px 6px;
+            margin: 2px;
+        }
+
+    .dataTables_wrapper .dataTables_paginate {
+        display: flex !important;
+        justify-content: center !important;
+    }
+
+        .dataTables_wrapper .dataTables_paginate .paginate_button {
+            padding: 5px 10px;
+            margin: 2px;
+            border-radius: 5px;
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            color: #007bff;
+            cursor: pointer;
+        }
+
+            .dataTables_wrapper .dataTables_paginate .paginate_button:hover {
+                background: #007bff;
+                color: white;
+            }
+
+            .dataTables_wrapper .dataTables_paginate .paginate_button.current {
+                background: #007bff !important;
+                color: white !important;
+                border-color: #007bff;
+            }
+
+            .dataTables_wrapper .dataTables_paginate .paginate_button.previous, .dataTables_wrapper .dataTables_paginate .paginate_button.next {
+                font-size: 11px !important;
+                margin: 0 10px !important
+            }
+</style>
 <div class="container">
-    <input type="hidden" id="projectId" />
-
-    <div class="form-group">
-        <label>Project Name</label>
-        <input type="text" id="projectName" class="form-control" />
+    <div class="row page-titles">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item active"><a href="javascript:void(0)">Project</a></li>
+            <li class="breadcrumb-item"><a href="javascript:void(0)">Project Master</a></li>
+        </ol>
+    </div>
+    <div class="card shadow-lg p-4">
+        <div class="row">
+            <div class="col-md-8">
+                <label for="projectName" class="form-label">Project Name</label>
+                <input type="text" id="projectName" class="form-control" placeholder="Enter project name" />
+                <input type="hidden" id="projectId" />
+            </div>
+            <div class="col-md-4 d-flex align-items-end">
+                <button class="btn btn-success w-100" onclick="saveProject()">
+                    <i class="fa fa-save"></i> Save Project
+                </button>
+            </div>
+        </div>
     </div>
 
-    <button class="btn btn-success" onclick="saveProject()">Save</button>
-
-    <table id="projectTable" class="table table-bordered mt-3">
-        <thead>
-            <tr>
-                <th>Project Name</th>
-                <th>Status</th>
-                <th>Actions</th>
-            </tr>
-        </thead>
-        <tbody></tbody>
-    </table>
+    <div class="card mt-4 shadow-lg">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <span>Assigned Projects</span>
+            <div class="export-buttons"></div> <!-- Buttons will be placed here -->
+        </div>
+        <div class="card-body">
+            <table id="projectTable" class="table table-striped table-bordered">
+                <thead class="table-dark">
+                    <tr>
+                        <th>Project Name</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+    </div>
 </div>
 
-<!-- Include DataTables -->
-<link href="https://cdn.datatables.net/1.11.5/css/jquery.dataTables.min.css" rel="stylesheet">
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<script src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/2.4.2/js/dataTables.buttons.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/pdfmake.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/vfs_fonts.js"></script>
+    <script src="https://cdn.datatables.net/buttons/2.4.2/js/buttons.html5.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/2.4.2/js/buttons.print.min.js"></script>
 
-<script>
-    $(document).ready(function () {
-        loadProjects();
-    });
-
-    function loadProjects() {
-        $.get("/Project/GetAllProjects", function (data) {
-         //   $('#projectTable').DataTable().destroy();
-            $("#projectTable tbody").html("");
-            $.each(data, function (index, item) {
-                let statusBtn = item.IsActive
-                    ? `<button class="btn btn-success" onclick="toggleStatus(${item.Id}, false)">Active</button>`
-                    : `<button class="btn btn-secondary" onclick="toggleStatus(${item.Id}, true)">Inactive</button>`;
-
-                $("#projectTable tbody").append(`
-                <tr>
-                    <td>${item.ProjectName}</td>
-                    <td>${statusBtn}</td>
-                    <td>
-                        <button class="btn btn-warning" onclick="editProject(${item.Id})">Edit</button>
-                        <button class="btn btn-danger" onclick="deleteProject(${item.Id})">Delete</button>
-                    </td>
-                </tr>
-            `);
-            });
-         //   $('#projectTable').DataTable();
-        });
-    }
-
-    function saveProject() {
-        var project = {
-            Id: $("#projectId").val() || 0,
-            ProjectName: $("#projectName").val()
-        };
-
-        $.post("/Project/AddOrUpdate", project, function () {
-            alert("Project saved successfully!");
-            $("#projectId").val("");
-            $("#projectName").val("");
+    <script>
+        $(document).ready(function () {
             loadProjects();
         });
-    }
 
-    function editProject(id) {
-        $.get("/Project/GetProjectById?id=" + id, function (data) {
-            $("#projectId").val(data.Id);
-            $("#projectName").val(data.ProjectName);
-        });
-    }
+        function loadProjects() {
+            $.ajax({
+                url: "/Project/GetAllProjects",
+                type: "GET",
+                dataType: "json",
+                success: function (data) {
+                    let table = $("#projectTable").DataTable();
+                    table.clear().destroy();
 
-    function deleteProject(id) {
-        if (confirm("Are you sure you want to delete this project?")) {
-            $.post("/Project/DeleteProject", { id: id }, function () {
-                alert("Project deleted successfully!");
-                loadProjects();
+                    let tbody = $("#projectTable tbody");
+                    tbody.empty();
+
+                    $.each(data, function (index, item) {
+                        let statusBtn = `<button class="btn ${item.IsActive ? 'btn-success' : 'btn-secondary'} btn-sm"
+                                     onclick="toggleStatus(${item.Id}, ${!item.IsActive})">
+                                     ${item.IsActive ? 'Active' : 'Inactive'}</button>`;
+
+                        tbody.append(`
+                        <tr>
+                            <td>${item.ProjectName}</td>
+                            <td>${statusBtn}</td>
+                            <td>
+                                <button class="btn btn-warning btn-sm" onclick="editProject(${item.Id})">
+                                    <i class="fa fa-edit"></i> Edit
+                                </button>
+                                <button class="btn btn-danger btn-sm" onclick="deleteProject(${item.Id})">
+                                    <i class="fa fa-trash"></i> Delete
+                                </button>
+                            </td>
+                        </tr>
+                    `);
+                    });
+
+                    $("#projectTable").DataTable({
+                        destroy: true, // Prevent duplication
+                        dom: "Bfrtip", // Keep buttons functional
+                        pageLength: 10, // Show 10 records per page
+                        paging: true,
+                        searching: true,
+                        ordering: true,
+                        pagingType: "full_numbers",
+                        buttons: [
+                            {
+                                extend: "excelHtml5",
+                                text: '<i class="fas fa-file-excel"></i> Excel',
+                                className: "btn btn-success btn-sm"
+                            },
+                            {
+                                extend: "csvHtml5",
+                                text: '<i class="fas fa-file-csv"></i> CSV',
+                                className: "btn btn-info btn-sm"
+                            },
+                            {
+                                extend: "pdfHtml5",
+                                text: '<i class="fas fa-file-pdf"></i> PDF',
+                                className: "btn btn-danger btn-sm",
+                                orientation: "landscape",
+                                pageSize: "A4"
+                            },
+                            {
+                                extend: "print",
+                                text: '<i class="fas fa-print"></i> Print',
+                                className: "btn btn-primary btn-sm"
+                            }
+                        ],
+                        initComplete: function () {
+                            let buttonContainer = $(".dt-buttons").addClass("d-flex gap-2");
+                            $(".export-buttons").html(buttonContainer); // Move buttons to the custom div
+                        }
+                     });
+                },
+                error: function () {
+                    showToast("error", "Failed to load projects!");
+                }
             });
         }
-    }
 
-    function toggleStatus(id, status) {
-        $.post("/Project/UpdateStatus", { id: id, isActive: status }, function () {
-            alert("Status updated!");
-            loadProjects();
-        });
-    }
-</script>
+
+
+
+        function saveProject() {
+            var project = {
+                Id: $("#projectId").val() || 0,
+                ProjectName: $("#projectName").val().trim()
+            };
+
+            if (project.ProjectName === "") {
+                showToast("error", "Project name cannot be empty!");
+                return;
+            }
+
+            $.post("/Project/AddOrUpdate", project, function () {
+                showToast("success", "Project saved successfully!");
+                $("#projectId").val("");
+                $("#projectName").val("");
+                loadProjects();
+            }).fail(function () {
+                showToast("error", "Something went wrong!");
+            });
+        }
+
+        function editProject(id) {
+            $.get("/Project/GetProjectById?id=" + id, function (data) {
+                $("#projectId").val(data.Id);
+                $("#projectName").val(data.ProjectName);
+            }).fail(function () {
+                showToast("error", "Failed to fetch project details!");
+            });
+        }
+
+        function deleteProject(id) {
+            Swal.fire({
+                title: "Are you sure?",
+                text: "You won't be able to revert this!",
+                icon: "warning",
+                showCancelButton: true,
+                confirmButtonColor: "#d33",
+                cancelButtonColor: "#3085d6",
+                confirmButtonText: "Yes, delete it!"
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    $.post("/Project/DeleteProject", { id: id }, function () {
+                        showToast("success", "Project has been deleted.");
+                        loadProjects();
+                    }).fail(function () {
+                        showToast("error", "Failed to delete project!");
+                    });
+                }
+            });
+        }
+
+        function toggleStatus(id, status) {
+            $.post("/Project/UpdateStatus", { id: id, isActive: status }, function () {
+                showToast("success", "Project status has been changed.");
+                loadProjects();
+            }).fail(function () {
+                showToast("error", "Failed to update status!");
+            });
+        }
+
+        // ✅ **Reusable Toast Function**
+        function showToast(icon, message) {
+            Swal.fire({
+                icon: icon,
+                title: message,
+                toast: true,
+                position: "top-end",
+                showConfirmButton: false,
+                timer: 3000
+            });
+        }
+
+    </script>
+}

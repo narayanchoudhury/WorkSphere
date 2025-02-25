@@ -1,0 +1,185 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>@ViewBag.Title - Your Project</title>
+
+    <!-- Stylesheets -->
+    @*<link rel="stylesheet" href="~/assets/vendor/global/global.min.css">*@
+    <link rel="stylesheet" href="~/assets/vendor/jquery-nice-select/css/nice-select.css">
+    <link rel="stylesheet" href="~/assets/vendor/owl-carousel/owl.carousel.min.css">
+    <link rel="stylesheet" href="~/assets/css/style.css">
+    <link rel="stylesheet" href="~/assets/css/custom.css">
+    <!-- Font Awesome CDN -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+
+    <!-- Select2 CSS -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css" rel="stylesheet" />
+
+    @RenderSection("Styles", required: false)
+</head>
+<body>
+
+    <!-- Main Wrapper -->
+    <div id="main-wrapper">
+
+
+
+        <!-- Sidebar Navigation -->
+        <!--***********************************-->
+        <div class="nav-header">
+            <a href="index.html" class="brand-logo">
+                <div class="brand-title">
+                    <h2 class="">Work Sphere</h2>
+                </div>
+            </a>
+            <div class="nav-control">
+                <div class="hamburger">
+                    <span class="line"></span><span class="line"></span><span class="line"></span>
+                </div>
+            </div>
+        </div>
+        <!--**********************************
+            Nav header end
+        ***********************************-->
+        <!--**********************************
+            Header start
+        ***********************************-->
+        <div class="header border-bottom">
+            <div class="header-content">
+                <nav class="navbar navbar-expand">
+                    <div class="collapse navbar-collapse justify-content-between">
+                        <div class="header-left">
+                            <div class="dashboard_bar">Dashboard</div>
+                        </div>
+                        <ul class="navbar-nav header-right">
+                            <li class="nav-item d-flex align-items-center">
+                                <div class="input-group search-area">
+                                    <input type="text" class="form-control" placeholder="Search here..." />
+                                    <span class="input-group-text">
+                                        <a href="javascript:void(0)"><i class="flaticon-381-search-2"></i></a>
+                                    </span>
+                                </div>
+                            </li>
+
+
+                            <li class="nav-item dropdown header-profile">
+                                <a class="nav-link" href="javascript:void(0);" role="button" data-bs-toggle="dropdown">
+                                    <img src="~/assets/images/user.jpg" width="20" alt="" />
+                                    <div class="header-info ms-3">
+                                        <span class="fs-18 font-w500 mb-2">Franklin Jr.</span>
+                                        <small class="fs-12 font-w400">demo@gmail.com</small>
+                                    </div>
+                                </a>
+                                <div class="dropdown-menu dropdown-menu-end">
+                                    <a href="#" class="dropdown-item ai-icon">
+                                        <i class="bi bi-person"></i>
+                                        <span class="ms-2">Profile </span>
+                                    </a>
+                                    @*<a href="#" class="dropdown-item ai-icon">
+                                        <i class="bi bi-envelope"></i>
+                                        <span class="ms-2">Inbox </span>
+                                    </a>*@
+                                    <a href="@Url.Action("Inbox", "Messages")" class="dropdown-item ai-icon">
+                                        <i class="bi bi-envelope"></i>
+                                        <span class="ms-2">Inbox</span>
+                                    </a>
+
+                                    <a href="#" class="dropdown-item ai-icon">
+                                        <i class="bi bi-box-arrow-right"></i>
+                                        <span class="ms-2">Logout </span>
+                                    </a>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                </nav>
+            </div>
+        </div>
+        <!--**********************************
+            Header end ti-comment-alt
+        ***********************************-->
+        <!--**********************************
+            Sidebar start
+        ***********************************-->
+        <div class="dlabnav">
+            <div class="dlabnav-scroll">
+                <ul class="metismenu" id="menu">
+                    <li>
+                        <a class="has-arrow" href="javascript:void()" aria-expanded="false">
+                            <i class="bi bi-house-door"></i>
+                            <span class="nav-text">Dashboard</span>
+                        </a>
+                        <ul aria-expanded="false">
+                            <li><a href="#">Dropdown 1</a></li>
+                            <li><a href="#">Dropdown 2</a></li>
+                        </ul>
+                    </li>
+
+                    <li>
+                        <a class="has-arrow" href="javascript:void()" aria-expanded="false">
+                            <i class="bi bi-info-circle"></i>
+                            <span class="nav-text">Components</span>
+                        </a>
+                        <ul aria-expanded="false">
+                            <li><a href="#">Form</a></li>
+                            <li><a href="#">Table</a></li>
+                            <li>
+                                <a class="has-arrow" href="javascript:void()" aria-expanded="false">Dropdown</a>
+                                <ul aria-expanded="false">
+                                    <li><a href="./email-compose.html">Dropdown 1</a></li>
+                                    <li><a href="./email-inbox.html">Dropdown 2</a></li>
+                                    <li><a href="./email-read.html">Dropdown 3</a></li>
+                                </ul>
+                            </li>
+                        </ul>
+                    </li>
+
+                </ul>
+
+            </div>
+        </div>
+
+        <!-- Content Body -->
+        <div class="content-body">
+            <div class="container-fluid">
+                @RenderBody()
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="footer">
+            <div class="copyright">
+                <p>
+                    © Copyrights
+                    <script>document.write(new Date().getFullYear());</script>.
+                    Powered by <a href="#" target="_blank">Narayana Choudhury</a>
+                </p>
+            </div>
+        </div>
+
+    </div>
+    <!-- Main Wrapper End -->
+    <!-- Scripts -->
+    <!-- Load jQuery First -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+    <!-- Load Select2 JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js"></script>
+
+    <!-- Other Scripts -->
+    <script src="~/assets/vendor/global/global.min.js"></script>
+    <script src="~/assets/vendor/chart.js/Chart.bundle.min.js"></script>
+    <script src="~/assets/vendor/jquery-nice-select/js/jquery.nice-select.min.js"></script>
+    <script src="~/assets/vendor/owl-carousel/owl.carousel.js"></script>
+    <script src="~/assets/js/custom.min.js"></script>
+    <script src="~/assets/js/dlabnav-init.js"></script>
+    <script src="~/assets/js/demo.js"></script>
+    <script src="~/assets/js/styleSwitcher.js"></script>
+
+    @RenderSection("Scripts", required: false)
+
+</body>
+</html>
